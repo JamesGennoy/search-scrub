@@ -1,0 +1,1 @@
+pref("extensions.searchscrub.seconds", 0);

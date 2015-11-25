@@ -2,12 +2,18 @@
   "id": "searchscrub@jamesgennoy.com",
   "title": "Search Scrub",
   "name": "search-scrub",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Clears the contents of the search box after a search.",
   "main": "main.js",
   "author": "James Gennoy",
   "engines": {
     "firefox": ">=38.0a1"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "preferences": [{
+        "name": "seconds",
+        "title": "Seconds",
+        "type": "integer",
+        "value": 0
+    }]
 }

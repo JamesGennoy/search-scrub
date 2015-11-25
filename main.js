@@ -8,8 +8,6 @@ var SearchScrub = {
 
     originalSearchCommand: undefined,
 
-    timeoutId: undefined,
-
     init: function(browserWindow) {
         var _seconds = simplePrefs.prefs.seconds;
         if (isNaN(_seconds)) {
@@ -24,11 +22,12 @@ var SearchScrub = {
                     _searchbar.value = '';
                     _searchbar.handleSearchCommand = function() {
                         var _results = SearchScrub.originalSearchCommand.apply(this, arguments);
-                        if (SearchScrub.timeoutId) {
-                            clearTimeout(SearchScrub.timeoutId);
-                            SearchScrub.timeoutId = undefined;
+                        // Clear out an existing timeout
+                        if (browserWindow._searchTimeoutId) {
+                            clearTimeout(browserWindow._searchTimeoutId);
+                            delete browserWindow._searchTimeoutId;
                         }
-                        SearchScrub.timeoutId = setTimeout(function() {_searchbar.value = '';}, _seconds * 1000);
+                        browserWindow._searchTimeoutId = setTimeout(function() {_searchbar.value = ''; delete browserWindow._searchTimeoutId;}, _seconds * 1000);
                         return _results;
                     };
                 }
@@ -44,6 +43,11 @@ var SearchScrub = {
                 if (_searchbar && _searchbar.handleSearchCommand) {
                     _searchbar.handleSearchCommand = this.originalSearchCommand;
                 }
+            }
+            // Clear out any existing timeouts
+            if (browserWindow._searchTimeoutId) {
+                clearTimeout(browserWindow._searchTimeoutId);
+                delete browserWindow._searchTimeoutId;
             }
         }
     }

@@ -8,7 +8,7 @@ var SearchScrub = {
 
     originalSearchCommand: undefined,
 
-    init: function(browserWindow) {
+    init: function(browserWindow, clearSearch) {
         var _seconds = simplePrefs.prefs.seconds;
         if (isNaN(_seconds)) {
             _seconds = 0;
@@ -19,7 +19,10 @@ var SearchScrub = {
                 var _searchbar = _chromeWindow.document.getElementById('searchbar');
                 if (_searchbar && _searchbar.handleSearchCommand) {
                     this.originalSearchCommand = _searchbar.handleSearchCommand;
-                    _searchbar.value = '';
+                    // when installing clear the searchbar on existing windows
+                    if (clearSearch) {
+                        _searchbar.value = '';
+                    }
                     _searchbar.handleSearchCommand = function() {
                         var _results = SearchScrub.originalSearchCommand.apply(this, arguments);
                         // Clear out an existing timeout
@@ -35,7 +38,7 @@ var SearchScrub = {
         }
     },
 
-    remove: function(browserWindow) {
+    remove: function(browserWindow, deleteTimeouts) {
         if (browserWindow) {
             var _chromeWindow = viewFor(browserWindow);
             if (_chromeWindow) {
@@ -45,7 +48,7 @@ var SearchScrub = {
                 }
             }
             // Clear out any existing timeouts
-            if (browserWindow._searchTimeoutId) {
+            if (deleteTimeouts && browserWindow._searchTimeoutId) {
                 clearTimeout(browserWindow._searchTimeoutId);
                 delete browserWindow._searchTimeoutId;
             }
@@ -67,13 +70,13 @@ exports.main = function() {
 
     // Init on exsiting windows
     for(var x = 0; x < browserWindows.length; x++) {
-        SearchScrub.init(browserWindows[x]);
+        SearchScrub.init(browserWindows[x], true);
     }
 };
 
 exports.onUnload = function() {
     // Remove on exsiting windows
     for(var x = 0; x < browserWindows.length; x++) {
-        SearchScrub.remove(browserWindows[x]);
+        SearchScrub.remove(browserWindows[x], true);
     }
 };
